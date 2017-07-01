@@ -1,0 +1,101 @@
+Jonathan Munro Debug Log
+________________________________________________
+edge.cc: In constructor ‘Edge::Edge(Point, Point, GLfloat*)’:
+edge.cc:8:60: error: no matching function for call to ‘Point::Point()’
+ Edge::Edge(Point startPoint, Point endPoint, GLfloat* color)
+
+Made Point::Point(), an empty constructor.
+_________________________________________________
+
+*** Error in `./sgp': free(): invalid pointer: 0x00007fffa8c438d0 ***
+Aborted (core dumped)
+
+On exit of GL display
+
+I was trying to delete the colors array as if it were on the Heap.
+- Was trying to delete[] an array in the stack. 
+_________________________________________________
+
+
+polygon.cc: In constructor ‘Polygon::Polygon()’:
+polygon.cc:15:15: error: cannot convert ‘std::vector<Edge>’ to ‘Edge*’ in assignment
+
+-Changed Edge* to a vector<Edge>. Error when I forgot to use namespace std.
+
+_________________________________________________
+
+conics.o: In function `Ellipse::drawEllipse()':
+conics.cc:(.text+0x62c): undefined reference to `Ellipse::plotSymmetry(int, int)'
+conics.cc:(.text+0x6ea): undefined reference to `Ellipse::plotSymmetry(int, int)'
+conics.cc:(.text+0x7ff): undefined reference to `Ellipse::plotSymmetry(int, int)'
+collect2: error: ld returned 1 exit status
+
+-I had 'void plotSymmetry' instead of 'void Ellipse::plotSymmetry'
+_________________________________________________
+
+matrix.cc: In copy constructor ‘Matrix::Matrix(const Matrix&)’:
+matrix.cc:33:26: error: passing ‘const Matrix’ as ‘this’ argument of ‘float* Matrix::operator[](int)’ discards qualifiers [-fpermissive]
+    float* column = orig[i];
+
+I believe the issue is due to float* Matrix::operator[](const int col);
+  -Its not. Talked to Professor Weaver, solved issue with method by removing unnecissary "this->"
+  -Did not solve this error.
+
+Looks like the problem is because it is a const Matrix instead of a Matrix
+  -works as a Matrix
+
+Changed "float* Matrix::operator[](const int col)" to "float* Matrix::operator[](const int col) const"
+  -can't use assignment
+
+Looked back at reallyLongInt.cc from CS3 found solution
+  -used a.matrix[i][j] instead of a[i][j] to access the array itself (not the const Matrix)
+
+______________________________________________
+Program received signal SIGSEGV, Segmentation fault.
+malloc_consolidate (av=av@entry=0x7ffff6e95760 <main_arena>) at malloc.c:4151
+4151	malloc.c: No such file or directory.
+
+	I believe there is a double delete in the deleting vectors 
+	does vector.clear() delete the objects or just empty vector
+
+use the <vector>.clear() functionality, instead of individually deleting in clear callback
+_____________________________________________
+Found lemon bug... fixed lemon bug (longs)
+_____________________________________________
+If switching between objects without fully drawing the object == seg fault
+***************************************************************************************
+	Add object specific starts? yes
+	clear variables if start doesn't match current object? no. allows to pick up drawing from before
+________________________________________________________
+
+Sometimes I don't know if the translation goes the way I want it to or if its just a trick of my eyes.
+-- cannot recreate
+_________________________________________________________________
+
+float is not preserved in scaling.
+-in the matrix multiplication -> the sum of the products was an int value.
+_______________________________________________________
+
+
+^ FIXED ^
++++++++++++++++++++++++++++++++++++++++++++++++++
+STILL BUGGED
+___________________________________________________
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000406f08 in std::vector<Edge*, std::allocator<Edge*> >::size() const
+    ()
+
+-If polymorph is used twice in the same session.
+-Or if morph window is drawn into first.
+_____________________________________________________________
+
+Polymorph
+- The shape deconstructs and then reforms
+- because each line is effected individually
+___________________________________________________________________
+
+Fill
+- Overlap on circles & ellipse
+- Rotating ellipse makes it not completely filled & cause serious lag when large
+- Polygon doesn't draw & multiple cause a seg fault
